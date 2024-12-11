@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, Dimensions, PanResponder, TouchableOpacity } from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import Matter from "matter-js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width, height } = Dimensions.get("window");
 
 const INITIAL_OBSTACLE_SPEED = 5;
-const SPEED_INCREMENT_INTERVAL = 10; // Seconds
+const SPEED_INCREMENT_INTERVAL = 1;
 const SPEED_INCREMENT = 1;
+const SCORE_INCREMENT_INTERVAL = 0.1;
+const SCORE_INCREMENT = 1;
 
 const Rocket = ({ body }: any) => {
     const { position } = body;
@@ -111,6 +114,41 @@ export default function App() {
     const [gameOver, setGameOver] = useState(false);
     const [obstacleSpeed, setObstacleSpeed] = useState(INITIAL_OBSTACLE_SPEED);
     const [entities, setEntities] = useState(initializeEntities);
+    const [showHint, setShowHint] = useState(true);
+    const [score, setScore] = useState(0);
+    const [highScore, setHighScore] = useState(0);
+
+
+    useEffect(() => {
+        let scoreInterval: NodeJS.Timeout;
+
+        if (running) {
+            scoreInterval = setInterval(() => {
+                setScore((prevScore) => prevScore + SCORE_INCREMENT);
+            }, SCORE_INCREMENT_INTERVAL * 1000); // Convert seconds to milliseconds
+        }
+
+        return () => clearInterval(scoreInterval); // Cleanup interval
+    }, [running]);
+
+    useEffect(() => {
+        const hintTimeout = setTimeout(() => {
+            setShowHint(false); // Hide the hint after 5 seconds
+        }, 5000);
+
+        return () => clearTimeout(hintTimeout); // Cleanup timeout if the component unmounts
+    }, []);
+
+    useEffect(() => {
+        const loadHighScore = async () => {
+            const storedHighScore = await AsyncStorage.getItem("highScore");
+            if (storedHighScore) {
+                setHighScore(parseInt(storedHighScore, 10));
+            }
+        };
+        loadHighScore();
+    }, []);
+
 
     useEffect(() => {
         let speedInterval: NodeJS.Timeout;
@@ -149,38 +187,46 @@ export default function App() {
         };
     }
 
-    function restartGame() {
+    const restartGame = async () => {
+        if (score > highScore) {
+            setHighScore(score);
+            await AsyncStorage.setItem("highScore", score.toString());
+        }
         setEntities(initializeEntities());
         setObstacleSpeed(INITIAL_OBSTACLE_SPEED);
+        setScore(0);
         setRunning(true);
         setGameOver(false);
+        setShowHint(true);
     }
 
-    let initialTouchY = 0;
+    let initialRocketY = 0; // Store the rocket's initial Y position when dragging starts
+    let initialTouchY = 0; // Store the initial touch position
 
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onPanResponderGrant: (_, gestureState) => {
-            initialTouchY = gestureState.y0;
+            initialTouchY = gestureState.y0; // Capture the touch's Y position
+            initialRocketY = entities.rocket.body.position.y; // Capture the rocket's current Y position
         },
         onPanResponderMove: (_, gestureState) => {
+            // Calculate the new Y position based on the touch movement
             const deltaY = gestureState.moveY - initialTouchY;
-            const newY = Math.max(0, Math.min(height, entities.rocket.body.position.y + deltaY));
+            const newY = Math.max(
+                0,
+                Math.min(height, initialRocketY + deltaY) // Move relative to the rocket's initial position
+            );
             Matter.Body.setPosition(entities.rocket.body, { x: width / 4, y: newY });
-            initialTouchY = gestureState.moveY;
         },
-        onPanResponderRelease: () => {},
+        onPanResponderRelease: () => {
+            // Optional: Add any release logic if needed
+        },
     });
 
     return (
         <View style={styles.container} {...panResponder.panHandlers}>
             <GameEngine
-                systems={[
-                    (entities, args) => {
-                        entities.obstacleSpeed = obstacleSpeed;
-                        return physics(entities, args);
-                    },
-                ]}
+                systems={[physics]}
                 entities={entities}
                 running={running}
                 style={styles.gameContainer}
@@ -194,12 +240,16 @@ export default function App() {
                 {gameOver && (
                     <View style={styles.overlay}>
                         <Text style={styles.gameOverText}>Game Over</Text>
+                        <Text style={styles.gameOverText}>Score: {score}</Text>
+                        <Text style={styles.highScoreText}>High Score: {score> highScore ? score : highScore}</Text>
                         <TouchableOpacity onPress={restartGame} style={styles.restartButton}>
                             <Text style={styles.restartButtonText}>Restart</Text>
                         </TouchableOpacity>
                     </View>
                 )}
-                <Text style={styles.gameText}>Drag the Rocket Up or Down</Text>
+
+                {!gameOver && <Text style={styles.scoreCounter}>Score: {score}</Text>}
+                {!gameOver && showHint && <Text style={styles.hintText}>Drag the Rocket Up or Down</Text>}
             </GameEngine>
         </View>
     );
@@ -250,5 +300,25 @@ const styles = StyleSheet.create({
         color: "#000",
         fontSize: 20,
         fontWeight: "bold",
+    },
+    scoreCounter: {
+        position: "absolute",
+        top: 40,
+        left: 20,
+        color: "#fff",
+        fontSize: 18,
+    },
+    highScoreText: {
+        color: "white",
+        fontSize: 24,
+        marginBottom: 20,
+    },
+    hintText: {
+        position: "absolute",
+        top: 40,
+        width: "100%",
+        textAlign: "center",
+        color: "#fff",
+        fontSize: 18,
     },
 });
