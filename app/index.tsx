@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, Dimensions, PanResponder, TouchableOpacity } from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import Matter from "matter-js";
 
 const { width, height } = Dimensions.get("window");
 
-const OBSTACLE_SPEED = 5;
+const INITIAL_OBSTACLE_SPEED = 5;
+const SPEED_INCREMENT_INTERVAL = 10; // Seconds
+const SPEED_INCREMENT = 1;
 
 const Rocket = ({ body }: any) => {
     const { position } = body;
@@ -56,41 +58,69 @@ const physics = (entities: any, { time, dispatch }: any) => {
 
     Matter.Engine.update(engine, time.delta);
 
-    // Move obstacles left at a slower speed
+    // Move obstacles left
     Object.keys(entities)
         .filter((key) => key.includes("obstacle"))
         .forEach((key) => {
-            const obstacle = entities[key].body;
-            Matter.Body.setPosition(obstacle, { x: obstacle.position.x - OBSTACLE_SPEED, y: obstacle.position.y });
+            const obstacleEntity = entities[key];
 
-            // Reset obstacle when it moves off-screen
-            if (obstacle.position.x < -50) {
+            if (obstacleEntity?.body) {
+                const obstacle = obstacleEntity.body;
                 Matter.Body.setPosition(obstacle, {
-                    x: width + 50,
-                    y: Math.random() * height,
+                    x: obstacle.position.x - entities.obstacleSpeed,
+                    y: obstacle.position.y,
                 });
+
+                // Reset obstacle when it moves off-screen
+                if (obstacle.position.x < -50) {
+                    Matter.Body.setPosition(obstacle, {
+                        x: width + 50,
+                        y: Math.random() * height,
+                    });
+                }
+            } else {
+                console.warn(`Undefined obstacle body for key: ${key}`);
             }
         });
 
     // Collision detection
-    const rocket = entities.rocket.body;
-    Object.keys(entities)
-        .filter((key) => key.includes("obstacle"))
-        .forEach((key) => {
-            const obstacle = entities[key].body;
-            const collision = Matter.SAT.collides(rocket, obstacle);
-            if (collision?.collided) {
-                dispatch({ type: "game-over" }); // Emit a custom event
-            }
-        });
+    if (entities.rocket?.body) {
+        const rocket = entities.rocket.body;
+        Object.keys(entities)
+            .filter((key) => key.includes("obstacle"))
+            .forEach((key) => {
+                const obstacleEntity = entities[key];
+                if (obstacleEntity?.body) {
+                    const obstacle = obstacleEntity.body;
+                    const collision = Matter.SAT.collides(rocket, obstacle);
+                    if (collision?.collided) {
+                        dispatch({ type: "game-over" });
+                    }
+                }
+            });
+    } else {
+        console.warn("Rocket body is undefined");
+    }
 
     return entities;
 };
 
+
 export default function App() {
     const [running, setRunning] = useState(true);
     const [gameOver, setGameOver] = useState(false);
-    const [entities, setEntities] = useState(initializeEntities());
+    const [obstacleSpeed, setObstacleSpeed] = useState(INITIAL_OBSTACLE_SPEED);
+    const [entities, setEntities] = useState(initializeEntities);
+
+    useEffect(() => {
+        let speedInterval: NodeJS.Timeout;
+        if (running) {
+            speedInterval = setInterval(() => {
+                setObstacleSpeed((prevSpeed) => prevSpeed + SPEED_INCREMENT);
+            }, SPEED_INCREMENT_INTERVAL * 1000);
+        }
+        return () => clearInterval(speedInterval);
+    }, [running]);
 
     function initializeEntities() {
         const engine = Matter.Engine.create();
@@ -110,6 +140,7 @@ export default function App() {
 
         return {
             physics: { engine, world },
+            obstacleSpeed: INITIAL_OBSTACLE_SPEED,
             rocket: { body: rocket, renderer: Rocket },
             ...obstacles.reduce((acc, obstacle, index) => {
                 acc[`obstacle${index}`] = { body: obstacle, renderer: Obstacle };
@@ -120,6 +151,7 @@ export default function App() {
 
     function restartGame() {
         setEntities(initializeEntities());
+        setObstacleSpeed(INITIAL_OBSTACLE_SPEED);
         setRunning(true);
         setGameOver(false);
     }
@@ -143,7 +175,12 @@ export default function App() {
     return (
         <View style={styles.container} {...panResponder.panHandlers}>
             <GameEngine
-                systems={[physics]}
+                systems={[
+                    (entities, args) => {
+                        entities.obstacleSpeed = obstacleSpeed;
+                        return physics(entities, args);
+                    },
+                ]}
                 entities={entities}
                 running={running}
                 style={styles.gameContainer}
