@@ -4,6 +4,7 @@ import { GameEngine } from "react-native-game-engine";
 import Matter from "matter-js";
 
 const { width, height } = Dimensions.get("window");
+const OBSTACLE_SPEED = 5;
 
 const Rocket = ({ body }: any) => {
     const { position } = body;
@@ -44,6 +45,7 @@ const Obstacle = ({ body }: any) => {
     );
 };
 
+
 const physics = (entities: any, { time, dispatch }: any) => {
     const engine = entities.physics?.engine;
 
@@ -54,12 +56,12 @@ const physics = (entities: any, { time, dispatch }: any) => {
 
     Matter.Engine.update(engine, time.delta);
 
-    // Move obstacles left at a slower speed
+    // Move obstacles left at the configured speed
     Object.keys(entities)
         .filter((key) => key.includes("obstacle"))
         .forEach((key) => {
             const obstacle = entities[key].body;
-            Matter.Body.setPosition(obstacle, { x: obstacle.position.x - 2, y: obstacle.position.y });
+            Matter.Body.setPosition(obstacle, { x: obstacle.position.x - OBSTACLE_SPEED, y: obstacle.position.y });
 
             // Reset obstacle when it moves off-screen
             if (obstacle.position.x < -50) {
