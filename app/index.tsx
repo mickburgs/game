@@ -14,40 +14,64 @@ const SCORE_INCREMENT = 1;
 
 const Rocket = ({ body }: any) => {
     const { position } = body;
-    const width = 40;
-    const height = 60;
+    const collisionWidth = 20; // Exact collision size
+    const collisionHeight = 40; // Exact collision size
 
     return (
         <View
             style={{
                 position: "absolute",
-                left: position.x - width / 2,
-                top: position.y - height / 2,
-                width,
-                height,
-                backgroundColor: "red",
-                borderRadius: 10,
+                left: position.x - collisionWidth / 2,
+                top: position.y - collisionHeight / 2,
+                width: collisionWidth,
+                height: collisionHeight,
+                borderColor: "red", // Red border to visualize the collision frame
+                borderWidth: 2, // Visible collision border
+                justifyContent: "center",
+                alignItems: "center",
             }}
-        />
+        >
+            <Text
+                style={{
+                    fontSize: 40, // UI size of the rocket emoji
+                    transform: [{ rotate: "45deg" }], // Rotate the rocket emoji
+                    userSelect: "none", // Prevent text selection
+                }}
+            >
+                🚀
+            </Text>
+        </View>
     );
 };
 
 const Obstacle = ({ body }: any) => {
     const { position } = body;
-    const width = 50;
-    const height = 150;
+    const collisionWidth = 30; // Exact collision size
+    const collisionHeight = 100; // Exact collision size
 
     return (
         <View
             style={{
                 position: "absolute",
-                left: position.x - width / 2,
-                top: position.y - height / 2,
-                width,
-                height,
-                backgroundColor: "blue",
+                left: position.x - collisionWidth / 2,
+                top: position.y - collisionHeight / 2,
+                width: collisionWidth,
+                height: collisionHeight,
+                borderColor: "blue", // Blue border to visualize the collision frame
+                borderWidth: 2, // Visible collision border
+                justifyContent: "center",
+                alignItems: "center",
             }}
-        />
+        >
+            <Text
+                style={{
+                    fontSize: 50, // UI size of the obstacle emoji
+                    userSelect: "none", // Prevent text selection
+                }}
+            >
+                🪨
+            </Text>
+        </View>
     );
 };
 
@@ -173,15 +197,15 @@ export default function App() {
         const engine = Matter.Engine.create();
         const world = engine.world;
 
-        const rocket = Matter.Bodies.rectangle(width / 4, height / 2, 40, 60, {
+        const rocket = Matter.Bodies.rectangle(width / 4, height / 2, 20, 40, {
             isStatic: true,
-        });
+        }); // Collision body reduced to 20x40
 
         const obstacles = Array.from({ length: 3 }).map((_, index) =>
-            Matter.Bodies.rectangle(width + index * 200, Math.random() * height, 50, 150, {
+            Matter.Bodies.rectangle(width + index * 200, Math.random() * height, 30, 100, {
                 isStatic: true,
             })
-        );
+        ); // Collision body reduced to 30x100
 
         Matter.World.add(world, [rocket, ...obstacles]);
 
