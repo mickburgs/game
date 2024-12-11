@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Text, Dimensions, PanResponder } from "react-native";
+import { StyleSheet, View, Text, Dimensions, PanResponder, TouchableOpacity } from "react-native";
 import { GameEngine } from "react-native-game-engine";
 import Matter from "matter-js";
 
 const { width, height } = Dimensions.get("window");
+
 const OBSTACLE_SPEED = 5;
 
 const Rocket = ({ body }: any) => {
@@ -45,7 +46,6 @@ const Obstacle = ({ body }: any) => {
     );
 };
 
-
 const physics = (entities: any, { time, dispatch }: any) => {
     const engine = entities.physics?.engine;
 
@@ -56,7 +56,7 @@ const physics = (entities: any, { time, dispatch }: any) => {
 
     Matter.Engine.update(engine, time.delta);
 
-    // Move obstacles left at the configured speed
+    // Move obstacles left at a slower speed
     Object.keys(entities)
         .filter((key) => key.includes("obstacle"))
         .forEach((key) => {
@@ -90,57 +90,55 @@ const physics = (entities: any, { time, dispatch }: any) => {
 export default function App() {
     const [running, setRunning] = useState(true);
     const [gameOver, setGameOver] = useState(false);
+    const [entities, setEntities] = useState(initializeEntities());
 
-    // Initialize Matter.js
-    const engine = Matter.Engine.create();
-    const world = engine.world;
+    function initializeEntities() {
+        const engine = Matter.Engine.create();
+        const world = engine.world;
 
-    // Rocket (static in horizontal axis)
-    const rocket = Matter.Bodies.rectangle(width / 4, height / 2, 40, 60, {
-        isStatic: true,
-    });
-
-    // Obstacles
-    const obstacles = Array.from({ length: 3 }).map((_, index) =>
-        Matter.Bodies.rectangle(width + index * 200, Math.random() * height, 50, 150, {
+        const rocket = Matter.Bodies.rectangle(width / 4, height / 2, 40, 60, {
             isStatic: true,
-        })
-    );
+        });
 
-    // Add bodies to world
-    Matter.World.add(world, [rocket, ...obstacles]);
+        const obstacles = Array.from({ length: 3 }).map((_, index) =>
+            Matter.Bodies.rectangle(width + index * 200, Math.random() * height, 50, 150, {
+                isStatic: true,
+            })
+        );
 
-    // Initialize entities
-    const entities = {
-        physics: { engine, world },
-        rocket: { body: rocket, renderer: Rocket },
-        ...obstacles.reduce((acc, obstacle, index) => {
-            acc[`obstacle${index}`] = { body: obstacle, renderer: Obstacle };
-            return acc;
-        }, {}),
-    };
+        Matter.World.add(world, [rocket, ...obstacles]);
+
+        return {
+            physics: { engine, world },
+            rocket: { body: rocket, renderer: Rocket },
+            ...obstacles.reduce((acc, obstacle, index) => {
+                acc[`obstacle${index}`] = { body: obstacle, renderer: Obstacle };
+                return acc;
+            }, {}),
+        };
+    }
+
+    function restartGame() {
+        setEntities(initializeEntities());
+        setRunning(true);
+        setGameOver(false);
+    }
 
     let initialTouchY = 0;
 
-    // PanResponder for dragging the rocket vertically
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onPanResponderGrant: (_, gestureState) => {
-            // Capture the initial touch position
             initialTouchY = gestureState.y0;
         },
         onPanResponderMove: (_, gestureState) => {
-            // Calculate new Y position relative to the initial touch
             const deltaY = gestureState.moveY - initialTouchY;
-            const newY = Math.max(0, Math.min(height, rocket.position.y + deltaY));
-            Matter.Body.setPosition(rocket, { x: width / 4, y: newY });
-
-            // Update initial touch position to avoid jumping
+            const newY = Math.max(0, Math.min(height, entities.rocket.body.position.y + deltaY));
+            Matter.Body.setPosition(entities.rocket.body, { x: width / 4, y: newY });
             initialTouchY = gestureState.moveY;
         },
         onPanResponderRelease: () => {},
     });
-
 
     return (
         <View style={styles.container} {...panResponder.panHandlers}>
@@ -159,6 +157,9 @@ export default function App() {
                 {gameOver && (
                     <View style={styles.overlay}>
                         <Text style={styles.gameOverText}>Game Over</Text>
+                        <TouchableOpacity onPress={restartGame} style={styles.restartButton}>
+                            <Text style={styles.restartButtonText}>Restart</Text>
+                        </TouchableOpacity>
                     </View>
                 )}
                 <Text style={styles.gameText}>Drag the Rocket Up or Down</Text>
@@ -200,6 +201,17 @@ const styles = StyleSheet.create({
     gameOverText: {
         color: "white",
         fontSize: 32,
+        fontWeight: "bold",
+        marginBottom: 20,
+    },
+    restartButton: {
+        backgroundColor: "#fff",
+        padding: 15,
+        borderRadius: 10,
+    },
+    restartButtonText: {
+        color: "#000",
+        fontSize: 20,
         fontWeight: "bold",
     },
 });
