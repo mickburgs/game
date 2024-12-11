@@ -9,8 +9,14 @@ const { width, height } = Dimensions.get("window");
 const INITIAL_OBSTACLE_SPEED = 5;
 const SPEED_INCREMENT_INTERVAL = 5;
 const SPEED_INCREMENT = 1;
+
 const SCORE_INCREMENT_INTERVAL = 0.1;
 const SCORE_INCREMENT = 1;
+
+const MIN_OBSTACLE_SIZE = 30;
+const MAX_OBSTACLE_SIZE = 200;
+const MIN_ROTATION_SPEED = 0.1;
+const MAX_ROTATION_SPEED = 2;
 
 const Rocket = ({ body }: any) => {
     const { position } = body;
@@ -44,29 +50,28 @@ const Rocket = ({ body }: any) => {
     );
 };
 
-const Obstacle = ({ body }: any) => {
+const Obstacle = ({ body, width, height, rotation }: any) => {
     const { position } = body;
-    const collisionWidth = 30; // Exact collision size
-    const collisionHeight = 100; // Exact collision size
 
     return (
         <View
             style={{
                 position: "absolute",
-                left: position.x - collisionWidth / 2,
-                top: position.y - collisionHeight / 2,
-                width: collisionWidth,
-                height: collisionHeight,
-                borderColor: "blue", // Blue border to visualize the collision frame
-                borderWidth: 2, // Visible collision border
+                left: position.x - width / 2,
+                top: position.y - height / 2,
+                width,
+                height,
+                borderColor: "blue",
+                borderWidth: 2,
                 justifyContent: "center",
                 alignItems: "center",
+                transform: [{ rotate: `${rotation}deg` }], // Apply rotation
             }}
         >
             <Text
                 style={{
-                    fontSize: 50, // UI size of the obstacle emoji
-                    userSelect: "none", // Prevent text selection
+                    fontSize: width, // Scale emoji size based on width
+                    userSelect: "none",
                 }}
             >
                 🪨
@@ -74,6 +79,8 @@ const Obstacle = ({ body }: any) => {
         </View>
     );
 };
+
+const getRandomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
 
 const physics = (entities: any, { time, dispatch }: any) => {
     const engine = entities.physics?.engine;
@@ -85,28 +92,32 @@ const physics = (entities: any, { time, dispatch }: any) => {
 
     Matter.Engine.update(engine, time.delta);
 
-    // Move obstacles left
+    // Move obstacles left and apply rotation
     Object.keys(entities)
         .filter((key) => key.includes("obstacle"))
         .forEach((key) => {
             const obstacleEntity = entities[key];
-
             if (obstacleEntity?.body) {
                 const obstacle = obstacleEntity.body;
+
+                // Move the obstacle
                 Matter.Body.setPosition(obstacle, {
                     x: obstacle.position.x - entities.obstacleSpeed,
                     y: obstacle.position.y,
                 });
 
+                // Apply rotation
+                obstacleEntity.rotation +=
+                    obstacleEntity.rotationSpeed * obstacleEntity.rotationDirection;
+
                 // Reset obstacle when it moves off-screen
-                if (obstacle.position.x < -50) {
+                if (obstacle.position.x < -obstacleEntity.width) {
                     Matter.Body.setPosition(obstacle, {
-                        x: width + 50,
+                        x: width + obstacleEntity.width,
                         y: Math.random() * height,
                     });
+                    obstacleEntity.rotation = 0; // Reset rotation angle
                 }
-            } else {
-                console.warn(`Undefined obstacle body for key: ${key}`);
             }
         });
 
@@ -125,8 +136,6 @@ const physics = (entities: any, { time, dispatch }: any) => {
                     }
                 }
             });
-    } else {
-        console.warn("Rocket body is undefined");
     }
 
     return entities;
@@ -199,13 +208,24 @@ export default function App() {
 
         const rocket = Matter.Bodies.rectangle(width / 4, height / 2, 20, 40, {
             isStatic: true,
-        }); // Collision body reduced to 20x40
+        }); // Rocket collision size remains constant
 
-        const obstacles = Array.from({ length: 3 }).map((_, index) =>
-            Matter.Bodies.rectangle(width + index * 200, Math.random() * height, 30, 100, {
-                isStatic: true,
-            })
-        ); // Collision body reduced to 30x100
+        const obstacles = Array.from({ length: 3 }).map((_, index) => {
+            const obstacleWidth = getRandomBetween(MIN_OBSTACLE_SIZE, MAX_OBSTACLE_SIZE);
+            const obstacleHeight = getRandomBetween(MIN_OBSTACLE_SIZE, MAX_OBSTACLE_SIZE);
+            const obstacle = Matter.Bodies.rectangle(
+                width + index * 200,
+                Math.random() * height,
+                obstacleWidth,
+                obstacleHeight,
+                { isStatic: true }
+            );
+
+            obstacle.rotationSpeed = getRandomBetween(MIN_ROTATION_SPEED, MAX_ROTATION_SPEED);
+            obstacle.rotationDirection = Math.random() > 0.5 ? 1 : -1; // Randomly rotate clockwise or counterclockwise
+
+            return obstacle;
+        });
 
         Matter.World.add(world, [rocket, ...obstacles]);
 
@@ -214,7 +234,15 @@ export default function App() {
             obstacleSpeed: INITIAL_OBSTACLE_SPEED,
             rocket: { body: rocket, renderer: Rocket },
             ...obstacles.reduce((acc, obstacle, index) => {
-                acc[`obstacle${index}`] = { body: obstacle, renderer: Obstacle };
+                acc[`obstacle${index}`] = {
+                    body: obstacle,
+                    width: obstacle.bounds.max.x - obstacle.bounds.min.x,
+                    height: obstacle.bounds.max.y - obstacle.bounds.min.y,
+                    rotation: 0, // Initial rotation angle
+                    rotationSpeed: obstacle.rotationSpeed,
+                    rotationDirection: obstacle.rotationDirection,
+                    renderer: Obstacle,
+                };
                 return acc;
             }, {}),
         };
