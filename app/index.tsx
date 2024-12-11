@@ -7,7 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const { width, height } = Dimensions.get("window");
 
 const INITIAL_OBSTACLE_SPEED = 5;
-const SPEED_INCREMENT_INTERVAL = 1;
+const SPEED_INCREMENT_INTERVAL = 5;
 const SPEED_INCREMENT = 1;
 const SCORE_INCREMENT_INTERVAL = 0.1;
 const SCORE_INCREMENT = 1;
@@ -160,6 +160,15 @@ export default function App() {
         return () => clearInterval(speedInterval);
     }, [running]);
 
+    useEffect(() => {
+        // Sync the updated obstacleSpeed with the entities object
+        setEntities((prevEntities) => ({
+            ...prevEntities,
+            obstacleSpeed,
+        }));
+    }, [obstacleSpeed]);
+
+
     function initializeEntities() {
         const engine = Matter.Engine.create();
         const world = engine.world;
@@ -226,7 +235,12 @@ export default function App() {
     return (
         <View style={styles.container} {...panResponder.panHandlers}>
             <GameEngine
-                systems={[physics]}
+                systems={[
+                    (entities, args) => {
+                        entities.obstacleSpeed = obstacleSpeed; // Sync speed during the game loop
+                        return physics(entities, args);
+                    },
+                ]}
                 entities={entities}
                 running={running}
                 style={styles.gameContainer}
