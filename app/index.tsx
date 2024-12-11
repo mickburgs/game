@@ -120,15 +120,27 @@ export default function App() {
         }, {}),
     };
 
+    let initialTouchY = 0;
+
     // PanResponder for dragging the rocket vertically
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
+        onPanResponderGrant: (_, gestureState) => {
+            // Capture the initial touch position
+            initialTouchY = gestureState.y0;
+        },
         onPanResponderMove: (_, gestureState) => {
-            const newY = Math.max(0, Math.min(height, gestureState.moveY));
+            // Calculate new Y position relative to the initial touch
+            const deltaY = gestureState.moveY - initialTouchY;
+            const newY = Math.max(0, Math.min(height, rocket.position.y + deltaY));
             Matter.Body.setPosition(rocket, { x: width / 4, y: newY });
+
+            // Update initial touch position to avoid jumping
+            initialTouchY = gestureState.moveY;
         },
         onPanResponderRelease: () => {},
     });
+
 
     return (
         <View style={styles.container} {...panResponder.panHandlers}>
