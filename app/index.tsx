@@ -71,13 +71,14 @@ const Obstacle = ({ body, width, rotation }: any) => {
             style={{
                 position: "absolute",
                 left: position.x - width / 2,
-                top: position.y - width / 2, // Adjust top position for square dimensions
+                top: position.y - width / 2,
                 width,
-                height: width, // Ensure square dimensions
-                borderColor: "blue", // Collision frame
+                height: width, // Ensure it's a circle (width = height)
+                borderRadius: width / 2, // Makes the collision frame circular
+                borderColor: "blue", // Collision frame color
                 borderWidth: 2,
-                overflow: "visible", // Allow the obstacle to render outside bounds
-                zIndex: 1, // Ensure it is visible above other elements
+                overflow: "visible",
+                zIndex: 1,
                 justifyContent: "center",
                 alignItems: "center",
             }}
@@ -89,7 +90,7 @@ const Obstacle = ({ body, width, rotation }: any) => {
                     height: width,
                     justifyContent: "center",
                     alignItems: "center",
-                    transform: [{ rotate: `${rotation}deg` }], // Apply rotation to the obstacle
+                    transform: [{ rotate: `${rotation}deg` }], // Rotate the obstacle
                 }}
             >
                 <Text
@@ -233,16 +234,14 @@ export default function App() {
 
         const rocket = Matter.Bodies.rectangle(width / 4, height / 2, 20, 40, {
             isStatic: true,
-        }); // Rocket collision size remains constant
+        });
 
         const obstacles = Array.from({ length: 3 }).map((_, index) => {
-            const obstacleWidth = getRandomBetween(MIN_OBSTACLE_SIZE, MAX_OBSTACLE_SIZE);
-            const obstacleHeight = getRandomBetween(MIN_OBSTACLE_SIZE, MAX_OBSTACLE_SIZE);
-            const obstacle = Matter.Bodies.rectangle(
+            const size = getRandomBetween(MIN_OBSTACLE_SIZE, MAX_OBSTACLE_SIZE); // Use size for the circle's diameter
+            const obstacle = Matter.Bodies.circle(
                 width + index * 200,
                 Math.random() * height,
-                obstacleWidth,
-                obstacleHeight,
+                size / 2, // Radius of the circle
                 { isStatic: true }
             );
 
@@ -261,8 +260,8 @@ export default function App() {
             ...obstacles.reduce((acc, obstacle, index) => {
                 acc[`obstacle${index}`] = {
                     body: obstacle,
-                    width: obstacle.bounds.max.x - obstacle.bounds.min.x,
-                    rotation: 0, // Initial rotation angle
+                    width: obstacle.circleRadius * 2, // Diameter for rendering
+                    rotation: 0,
                     rotationSpeed: obstacle.rotationSpeed,
                     rotationDirection: obstacle.rotationDirection,
                     renderer: Obstacle,
