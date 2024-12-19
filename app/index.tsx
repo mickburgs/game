@@ -150,7 +150,7 @@ export default function App() {
     const [showHint, setShowHint] = useState(true);
     const [score, setScore] = useState(0);
     const [highScore, setHighScore] = useState(0);
-
+    const [componentKey, setComponentKey] = useState(0);
 
     useEffect(() => {
         let scoreInterval: NodeJS.Timeout;
@@ -259,6 +259,7 @@ export default function App() {
         setRunning(true);
         setGameOver(false);
         setShowHint(true);
+        setComponentKey((prevKey) => prevKey + 1);
     }
 
     let initialRocketY = 0; // Store the rocket's initial Y position when dragging starts
@@ -285,7 +286,7 @@ export default function App() {
     });
 
     return (
-        <View style={styles.container} {...panResponder.panHandlers}>
+        <View key={componentKey} style={styles.container} {...panResponder.panHandlers}>
             <GameEngine
                 systems={[
                     (entities, args) => {
@@ -307,15 +308,18 @@ export default function App() {
                     <View style={styles.overlay}>
                         <Text style={styles.gameOverText}>Game Over</Text>
                         <Text style={styles.gameOverText}>Score: {score}</Text>
-                        <Text style={styles.highScoreText}>High Score: {score> highScore ? score : highScore}</Text>
+                        <Text style={styles.highScoreText}>
+                            High Score: {score > highScore ? score : highScore}
+                        </Text>
                         <TouchableOpacity onPress={restartGame} style={styles.restartButton}>
                             <Text style={styles.restartButtonText}>Restart</Text>
                         </TouchableOpacity>
                     </View>
                 )}
-
                 {!gameOver && <Text style={styles.scoreCounter}>Score: {score}</Text>}
-                {!gameOver && showHint && <Text style={styles.hintText}>Drag the Rocket Up or Down</Text>}
+                {!gameOver && showHint && (
+                    <Text style={styles.hintText}>Drag the Rocket Up or Down</Text>
+                )}
             </GameEngine>
         </View>
     );
