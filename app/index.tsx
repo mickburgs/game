@@ -62,7 +62,8 @@ const Rocket = ({ body }: any) => {
         </View>
     );
 };
-const Obstacle = ({ body, width, height, rotation }: any) => {
+
+const Obstacle = ({ body, width, rotation }: any) => {
     const { position } = body;
 
     return (
@@ -70,24 +71,36 @@ const Obstacle = ({ body, width, height, rotation }: any) => {
             style={{
                 position: "absolute",
                 left: position.x - width / 2,
-                top: position.y - height / 2,
+                top: position.y - width / 2, // Adjust top position for square dimensions
                 width,
-                height,
-                borderColor: "blue",
+                height: width, // Ensure square dimensions
+                borderColor: "blue", // Collision frame
                 borderWidth: 2,
+                overflow: "visible", // Allow the obstacle to render outside bounds
+                zIndex: 1, // Ensure it is visible above other elements
                 justifyContent: "center",
                 alignItems: "center",
-                transform: [{ rotate: `${rotation}deg` }], // Apply rotation
             }}
         >
-            <Text
+            <View
                 style={{
-                    fontSize: width, // Scale emoji size based on width
-                    userSelect: "none",
+                    position: "absolute",
+                    width,
+                    height: width,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    transform: [{ rotate: `${rotation}deg` }], // Apply rotation to the obstacle
                 }}
             >
-                🪨
-            </Text>
+                <Text
+                    style={{
+                        fontSize: width, // Scale emoji size based on width
+                        userSelect: "none",
+                    }}
+                >
+                    🪨
+                </Text>
+            </View>
         </View>
     );
 };
@@ -249,7 +262,6 @@ export default function App() {
                 acc[`obstacle${index}`] = {
                     body: obstacle,
                     width: obstacle.bounds.max.x - obstacle.bounds.min.x,
-                    height: obstacle.bounds.max.y - obstacle.bounds.min.y,
                     rotation: 0, // Initial rotation angle
                     rotationSpeed: obstacle.rotationSpeed,
                     rotationDirection: obstacle.rotationDirection,
