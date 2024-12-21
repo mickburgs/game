@@ -13,6 +13,8 @@ const SPEED_INCREMENT = 1;
 const SCORE_INCREMENT_INTERVAL = 0.1;
 const SCORE_INCREMENT = 1;
 
+const OBSTACLE_FRAME_SCALE = 0.7;
+
 const MIN_OBSTACLE_SIZE = 30;
 const MAX_OBSTACLE_SIZE = 200;
 const MIN_ROTATION_SPEED = 0.1;
@@ -32,7 +34,7 @@ const Rocket = ({ body }: any) => {
                 width: collisionWidth,
                 height: collisionHeight,
                 borderColor: "red", // Red border for collision frame
-                borderWidth: 2, // Border thickness
+                borderWidth: 0, // Border thickness
                 overflow: "visible", // Ensure the rocket is visible outside the collision frame
                 zIndex: 1, // Ensure visibility above other elements
                 justifyContent: "center",
@@ -63,20 +65,24 @@ const Rocket = ({ body }: any) => {
     );
 };
 
+
 const Obstacle = ({ body, width, rotation }: any) => {
     const { position } = body;
+
+    // Calculate the frame size based on the scale
+    const frameWidth = width * OBSTACLE_FRAME_SCALE;
 
     return (
         <View
             style={{
                 position: "absolute",
-                left: position.x - width / 2,
-                top: position.y - width / 2, // Subtract half the width to center it
-                width: width,
-                height: width, // Ensure it's a square (width = height)
-                borderRadius: width / 2, // Makes the collision frame circular
+                left: position.x - frameWidth / 2,
+                top: position.y - frameWidth / 2, // Center the frame
+                width: frameWidth,
+                height: frameWidth, // Keep it a square
+                borderRadius: frameWidth / 2, // Makes the frame circular
                 borderColor: "blue", // Collision frame color
-                borderWidth: 2, // Adjust thickness as needed
+                borderWidth: 0, // Frame thickness
                 justifyContent: "center",
                 alignItems: "center",
             }}
@@ -93,7 +99,7 @@ const Obstacle = ({ body, width, rotation }: any) => {
             >
                 <Text
                     style={{
-                        fontSize: width * 0.8, // Scale emoji size based on width
+                        fontSize: width * 0.8, // Scale emoji size
                         userSelect: "none",
                     }}
                 >
@@ -103,6 +109,7 @@ const Obstacle = ({ body, width, rotation }: any) => {
         </View>
     );
 };
+
 const getRandomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
 
 const physics = (entities: any, { time, dispatch }: any) => {
@@ -234,16 +241,17 @@ export default function App() {
         });
 
         const obstacles = Array.from({ length: 3 }).map((_, index) => {
-            const size = getRandomBetween(MIN_OBSTACLE_SIZE, MAX_OBSTACLE_SIZE); // Use size for the circle's diameter
+            const size = getRandomBetween(MIN_OBSTACLE_SIZE, MAX_OBSTACLE_SIZE);
+            const scaledSize = size * OBSTACLE_FRAME_SCALE; // Scale down the size for the collision frame
             const obstacle = Matter.Bodies.circle(
                 width + index * 200,
                 Math.random() * height,
-                size / 2, // Radius of the circle
+                scaledSize / 2, // Use the scaled-down radius
                 { isStatic: true }
             );
 
             obstacle.rotationSpeed = getRandomBetween(MIN_ROTATION_SPEED, MAX_ROTATION_SPEED);
-            obstacle.rotationDirection = Math.random() > 0.5 ? 1 : -1; // Randomly rotate clockwise or counterclockwise
+            obstacle.rotationDirection = Math.random() > 0.5 ? 1 : -1;
 
             return obstacle;
         });
@@ -255,9 +263,10 @@ export default function App() {
             obstacleSpeed: INITIAL_OBSTACLE_SPEED,
             rocket: { body: rocket, renderer: Rocket },
             ...obstacles.reduce((acc, obstacle, index) => {
+                const size = obstacle.circleRadius * 2 / OBSTACLE_FRAME_SCALE; // Adjust size for rendering
                 acc[`obstacle${index}`] = {
                     body: obstacle,
-                    width: obstacle.circleRadius * 2, // Diameter for rendering
+                    width: size, // Original size for the visual representation
                     rotation: 0,
                     rotationSpeed: obstacle.rotationSpeed,
                     rotationDirection: obstacle.rotationDirection,
