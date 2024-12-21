@@ -293,6 +293,7 @@ export default function App() {
         onPanResponderGrant: (_, gestureState) => {
             initialTouchY = gestureState.y0; // Capture the touch's Y position
             initialRocketY = entities.rocket.body.position.y; // Capture the rocket's current Y position
+            setShowHint(false); // Hide the hint text
         },
         onPanResponderMove: (_, gestureState) => {
             // Calculate the new Y position based on the touch movement
