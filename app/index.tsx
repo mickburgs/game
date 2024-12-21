@@ -71,14 +71,12 @@ const Obstacle = ({ body, width, rotation }: any) => {
             style={{
                 position: "absolute",
                 left: position.x - width / 2,
-                top: position.y - width / 2,
-                width,
-                height: width, // Ensure it's a circle (width = height)
+                top: position.y - width / 2, // Subtract half the width to center it
+                width: width,
+                height: width, // Ensure it's a square (width = height)
                 borderRadius: width / 2, // Makes the collision frame circular
                 borderColor: "blue", // Collision frame color
-                borderWidth: 2,
-                overflow: "visible",
-                zIndex: 1,
+                borderWidth: 2, // Adjust thickness as needed
                 justifyContent: "center",
                 alignItems: "center",
             }}
@@ -86,16 +84,16 @@ const Obstacle = ({ body, width, rotation }: any) => {
             <View
                 style={{
                     position: "absolute",
-                    width,
+                    width: width,
                     height: width,
                     justifyContent: "center",
                     alignItems: "center",
-                    transform: [{ rotate: `${rotation}deg` }], // Rotate the obstacle
+                    transform: [{ rotate: `${rotation}deg` }], // Apply rotation
                 }}
             >
                 <Text
                     style={{
-                        fontSize: width, // Scale emoji size based on width
+                        fontSize: width * 0.8, // Scale emoji size based on width
                         userSelect: "none",
                     }}
                 >
@@ -105,7 +103,6 @@ const Obstacle = ({ body, width, rotation }: any) => {
         </View>
     );
 };
-
 const getRandomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
 
 const physics = (entities: any, { time, dispatch }: any) => {
