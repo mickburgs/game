@@ -17,7 +17,7 @@ const Obstacle = ({ body, width, rotation, emoji }: any) => {
                 height: frameWidth, // Keep it a square
                 borderRadius: frameWidth / 2, // Makes the frame circular
                 borderColor: "blue", // Collision frame color
-                borderWidth: 2, // Frame thickness
+                borderWidth: 0, // Frame thickness
                 justifyContent: "center",
                 alignItems: "center",
             }}
