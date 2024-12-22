@@ -2,7 +2,7 @@ import {Text, View} from "react-native";
 import React from "react";
 import {OBSTACLE_FRAME_SCALE} from "@/app/gameConstants";
 
-const Obstacle = ({ body, width, rotation }: any) => {
+const Obstacle = ({ body, width, rotation, emoji }: any) => {
     const { position } = body;
 
     const frameWidth = width * OBSTACLE_FRAME_SCALE;
@@ -38,7 +38,7 @@ const Obstacle = ({ body, width, rotation }: any) => {
                         userSelect: "none",
                     }}
                 >
-                    🪨
+                    {emoji}
                 </Text>
             </View>
         </View>

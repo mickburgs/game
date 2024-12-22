@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, Dimensions, PanResponder, TouchableOpacity } from "react-native";
-import { GameEngine } from "react-native-game-engine";
+import React, {useState, useEffect} from "react";
+import {StyleSheet, View, Text, Dimensions, PanResponder, TouchableOpacity} from "react-native";
+import {GameEngine} from "react-native-game-engine";
 import Matter from "matter-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Rocket from "@/components/Rocket";
@@ -11,7 +11,7 @@ import {
     MAX_ROTATION_SPEED,
     MIN_OBSTACLE_SIZE,
     MIN_ROTATION_SPEED,
-    OBSTACLE_FRAME_SCALE,
+    OBSTACLE_FRAME_SCALE, PRIMARY_OBSTACE,
     SCORE_INCREMENT,
     SCORE_INCREMENT_INTERVAL,
     SPEED_INCREMENT,
@@ -19,7 +19,7 @@ import {
 } from "@/app/gameConstants";
 import Obstacle from "@/components/Obstacle";
 
-const { width, height } = Dimensions.get("window");
+const {width, height} = Dimensions.get("window");
 
 export default function App() {
     const [running, setRunning] = useState(true);
@@ -80,7 +80,6 @@ export default function App() {
         }));
     }, [obstacleSpeed]);
 
-
     function initializeEntities() {
         const engine = Matter.Engine.create();
         const world = engine.world;
@@ -89,28 +88,30 @@ export default function App() {
             isStatic: true,
         });
 
-        const obstacles = Array.from({ length: 3 }).map((_, index) => {
+        const obstacles = Array.from({length: 3}).map((_, index) => {
             const size = getRandomBetween(MIN_OBSTACLE_SIZE, MAX_OBSTACLE_SIZE);
             const scaledSize = size * OBSTACLE_FRAME_SCALE; // Scale down the size for the collision frame
             const obstacle = Matter.Bodies.circle(
                 width + index * 200,
                 Math.random() * height,
                 scaledSize / 2, // Use the scaled-down radius
-                { isStatic: true }
+                {isStatic: true}
             );
 
+            obstacle.emoji = PRIMARY_OBSTACE;
             obstacle.rotationSpeed = getRandomBetween(MIN_ROTATION_SPEED, MAX_ROTATION_SPEED);
             obstacle.rotationDirection = Math.random() > 0.5 ? 1 : -1;
 
             return obstacle;
         });
+        console.log(obstacles);
 
         Matter.World.add(world, [rocket, ...obstacles]);
 
         return {
-            physics: { engine, world },
+            physics: {engine, world},
             obstacleSpeed: INITIAL_OBSTACLE_SPEED,
-            rocket: { body: rocket, renderer: Rocket },
+            rocket: {body: rocket, renderer: Rocket},
             ...obstacles.reduce((acc, obstacle, index) => {
                 const size = obstacle.circleRadius * 2 / OBSTACLE_FRAME_SCALE; // Adjust size for rendering
                 acc[`obstacle${index}`] = {
@@ -119,6 +120,7 @@ export default function App() {
                     rotation: 0,
                     rotationSpeed: obstacle.rotationSpeed,
                     rotationDirection: obstacle.rotationDirection,
+                    emoji: obstacle.emoji,
                     renderer: Obstacle,
                 };
                 return acc;
@@ -157,7 +159,7 @@ export default function App() {
                 0,
                 Math.min(height, initialRocketY + deltaY) // Move relative to the rocket's initial position
             );
-            Matter.Body.setPosition(entities.rocket.body, { x: width / 4, y: newY });
+            Matter.Body.setPosition(entities.rocket.body, {x: width / 4, y: newY});
         },
         onPanResponderRelease: () => {
             // Optional: Add any release logic if needed
