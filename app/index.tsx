@@ -4,6 +4,7 @@ import { GameEngine } from "react-native-game-engine";
 import Matter from "matter-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Rocket from "@/components/Rocket";
+import {getRandomBetween} from "@/utils/gameUtils";
 
 const { width, height } = Dimensions.get("window");
 
@@ -64,8 +65,6 @@ const Obstacle = ({ body, width, rotation }: any) => {
         </View>
     );
 };
-
-const getRandomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
 
 const physics = (entities: any, { time, dispatch }: any) => {
     const engine = entities.physics?.engine;
