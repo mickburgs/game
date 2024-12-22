@@ -1,49 +1,53 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
 
-const Rocket = ({ body }: any) => {
+const Rocket = ({ body }) => {
     const { position } = body;
-    const collisionWidth = 40;
-    const collisionHeight = 20;
+    const collisionWidth = 45;
+    const collisionHeight = 25;
 
     return (
         <View
-            style={{
-                position: "absolute",
-                left: position.x - collisionWidth / 2,
-                top: position.y - collisionHeight / 2,
-                width: collisionWidth,
-                height: collisionHeight,
-                borderColor: "red", // Red border for collision frame
-                borderWidth: 2, // Border thickness
-                overflow: "visible", // Ensure the rocket is visible outside the collision frame
-                zIndex: 1, // Ensure visibility above other elements
-                justifyContent: "center",
-                alignItems: "center",
-            }}
+            style={[
+                styles.collisionFrame,
+                {
+                    left: position.x - collisionWidth / 2,
+                    top: position.y - collisionHeight / 2, // Offset collision frame slightly upwards
+                },
+            ]}
         >
-            <View
-                style={{
-                    position: "absolute", // Independent positioning for the rocket
-                    width: 40,
-                    height: 40,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    overflow: "visible", // Ensure the rocket is not clipped
-                    transform: [{ rotate: "45deg" }], // Rotate the rocket
-                }}
-            >
-                <Text
-                    style={{
-                        fontSize: 40, // Size of the rocket emoji
-                        userSelect: "none", // Prevent text selection
-                    }}
-                >
-                    🚀
-                </Text>
+            <View style={styles.rocket}>
+                <Text style={styles.rocketEmoji}>🚀</Text>
             </View>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    collisionFrame: {
+        position: "absolute",
+        width: 45,
+        height: 25,
+        justifyContent: "center",
+        alignItems: "center",
+        borderColor: "red", // Red collision frame
+        borderWidth: 0,
+        overflow: "visible",
+    },
+    rocket: {
+        position: "absolute",
+        justifyContent: "center",
+        alignItems: "center",
+        width: 40,
+        height: 40,
+        transform: [
+            { rotate: "45deg" },
+        ],
+    },
+    rocketEmoji: {
+        fontSize: 40,
+        userSelect: "none", // Prevent text selection
+    },
+});
 
 export default Rocket;
