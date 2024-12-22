@@ -1,12 +1,10 @@
 import {Text, View} from "react-native";
 import React from "react";
 import {OBSTACLE_FRAME_SCALE} from "@/app/gameConstants";
-import exp from "node:constants";
 
 const Obstacle = ({ body, width, rotation }: any) => {
     const { position } = body;
 
-    // Calculate the frame size based on the scale
     const frameWidth = width * OBSTACLE_FRAME_SCALE;
 
     return (
