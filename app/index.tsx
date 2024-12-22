@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, Dimensions, PanResponder, TouchableOpacity } fr
 import { GameEngine } from "react-native-game-engine";
 import Matter from "matter-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Rocket from "@/components/Rocket";
 
 const { width, height } = Dimensions.get("window");
 
@@ -19,52 +20,6 @@ const MIN_OBSTACLE_SIZE = 30;
 const MAX_OBSTACLE_SIZE = 200;
 const MIN_ROTATION_SPEED = 0.1;
 const MAX_ROTATION_SPEED = 2;
-
-const Rocket = ({ body }: any) => {
-    const { position } = body;
-    const collisionWidth = 40;
-    const collisionHeight = 20;
-
-    return (
-        <View
-            style={{
-                position: "absolute",
-                left: position.x - collisionWidth / 2,
-                top: position.y - collisionHeight / 2,
-                width: collisionWidth,
-                height: collisionHeight,
-                borderColor: "red", // Red border for collision frame
-                borderWidth: 0, // Border thickness
-                overflow: "visible", // Ensure the rocket is visible outside the collision frame
-                zIndex: 1, // Ensure visibility above other elements
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-        >
-            <View
-                style={{
-                    position: "absolute", // Independent positioning for the rocket
-                    width: 40,
-                    height: 40,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    overflow: "visible", // Ensure the rocket is not clipped
-                    transform: [{ rotate: "45deg" }], // Rotate the rocket
-                }}
-            >
-                <Text
-                    style={{
-                        fontSize: 40, // Size of the rocket emoji
-                        userSelect: "none", // Prevent text selection
-                    }}
-                >
-                    🚀
-                </Text>
-            </View>
-        </View>
-    );
-};
-
 
 const Obstacle = ({ body, width, rotation }: any) => {
     const { position } = body;
