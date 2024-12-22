@@ -104,7 +104,6 @@ export default function App() {
 
             return obstacle;
         });
-        console.log(obstacles);
 
         Matter.World.add(world, [rocket, ...obstacles]);
 

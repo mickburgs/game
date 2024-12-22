@@ -15,7 +15,7 @@ const Rocket = ({ body }: any) => {
                 width: collisionWidth,
                 height: collisionHeight,
                 borderColor: "red", // Red border for collision frame
-                borderWidth: 0, // Border thickness
+                borderWidth: 2, // Border thickness
                 overflow: "visible", // Ensure the rocket is visible outside the collision frame
                 zIndex: 1, // Ensure visibility above other elements
                 justifyContent: "center",
