@@ -5,66 +5,21 @@ import Matter from "matter-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Rocket from "@/components/Rocket";
 import {getRandomBetween} from "@/utils/gameUtils";
+import {
+    INITIAL_OBSTACLE_SPEED,
+    MAX_OBSTACLE_SIZE,
+    MAX_ROTATION_SPEED,
+    MIN_OBSTACLE_SIZE,
+    MIN_ROTATION_SPEED,
+    OBSTACLE_FRAME_SCALE,
+    SCORE_INCREMENT,
+    SCORE_INCREMENT_INTERVAL,
+    SPEED_INCREMENT,
+    SPEED_INCREMENT_INTERVAL
+} from "@/app/gameConstants";
+import Obstacle from "@/components/Obstacle";
 
 const { width, height } = Dimensions.get("window");
-
-const INITIAL_OBSTACLE_SPEED = 5;
-const SPEED_INCREMENT_INTERVAL = 5;
-const SPEED_INCREMENT = 1;
-
-const SCORE_INCREMENT_INTERVAL = 0.1;
-const SCORE_INCREMENT = 1;
-
-const OBSTACLE_FRAME_SCALE = 0.7;
-
-const MIN_OBSTACLE_SIZE = 30;
-const MAX_OBSTACLE_SIZE = 200;
-const MIN_ROTATION_SPEED = 0.1;
-const MAX_ROTATION_SPEED = 2;
-
-const Obstacle = ({ body, width, rotation }: any) => {
-    const { position } = body;
-
-    // Calculate the frame size based on the scale
-    const frameWidth = width * OBSTACLE_FRAME_SCALE;
-
-    return (
-        <View
-            style={{
-                position: "absolute",
-                left: position.x - frameWidth / 2,
-                top: position.y - frameWidth / 2, // Center the frame
-                width: frameWidth,
-                height: frameWidth, // Keep it a square
-                borderRadius: frameWidth / 2, // Makes the frame circular
-                borderColor: "blue", // Collision frame color
-                borderWidth: 0, // Frame thickness
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-        >
-            <View
-                style={{
-                    position: "absolute",
-                    width: width,
-                    height: width,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    transform: [{ rotate: `${rotation}deg` }], // Apply rotation
-                }}
-            >
-                <Text
-                    style={{
-                        fontSize: width * 0.8, // Scale emoji size
-                        userSelect: "none",
-                    }}
-                >
-                    🪨
-                </Text>
-            </View>
-        </View>
-    );
-};
 
 const physics = (entities: any, { time, dispatch }: any) => {
     const engine = entities.physics?.engine;
