@@ -15,8 +15,6 @@ import {
     OBSTACLE_FRAME_SCALE, PRIMARY_OBSTACLE,
     SCORE_INCREMENT,
     SCORE_INCREMENT_INTERVAL,
-    SPEED_INCREMENT,
-    SPEED_INCREMENT_INTERVAL
 } from "@/app/gameConstants";
 import Obstacle from "@/components/Obstacle";
 
@@ -55,13 +53,15 @@ export default function App() {
     }, []);
 
     useEffect(() => {
-        let speedInterval: NodeJS.Timeout;
+        let speedIncrementInterval: NodeJS.Timeout;
+
         if (running) {
-            speedInterval = setInterval(() => {
-                setObstacleSpeed((prevSpeed) => prevSpeed + SPEED_INCREMENT);
-            }, SPEED_INCREMENT_INTERVAL * 1000);
+            speedIncrementInterval = setInterval(() => {
+                setObstacleSpeed((prevSpeed) => prevSpeed + 0.1);
+            }, 500);
         }
-        return () => clearInterval(speedInterval);
+
+        return () => clearInterval(speedIncrementInterval);
     }, [running]);
 
     useEffect(() => {
