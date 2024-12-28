@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     gameContainer: {
         flex: 1,
         width: "100%",
-        height: "100%",
+        height: Dimensions.get('window').height,
         overflow: "visible",
     },
     gameText: {
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
         left: 0,
         width: "100%",
         height: "100%",
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        // backgroundColor: "rgba(0, 0, 0, 0.8)",
         justifyContent: "center",
         alignItems: "center",
     },

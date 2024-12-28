@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         borderColor: "red",
-        borderWidth: 0,
+        borderWidth: 2,
         overflow: "visible",
     },
     rocket: {

@@ -46,10 +46,12 @@ export const physics = (entities: any, { time, dispatch }: any, width: number, h
                     obstacleEntity.emoji = newEmoji;
 
                     let minSize = MIN_OBSTACLE_SIZE;
+                    let maxSize = MAX_OBSTACLE_SIZE;
                     if (newEmoji !== PRIMARY_OBSTACLE) {
                         minSize += 50;
+                        maxSize -= 80;
                     }
-                    const newSize = getRandomBetween(minSize, MAX_OBSTACLE_SIZE);
+                    const newSize = getRandomBetween(minSize, maxSize);
                     obstacle.circleRadius = (newSize * OBSTACLE_FRAME_SCALE) / 2;
                     obstacleEntity.width = newSize;
                 }
@@ -75,11 +77,20 @@ export const physics = (entities: any, { time, dispatch }: any, width: number, h
     return entities;
 };
 
+let lastUsedEmoji: string | null = null;
 function getRandomEmoji() {
     const rockProbability = 0.9; // 90% chance for rock
     if (Math.random() < rockProbability) {
         return PRIMARY_OBSTACLE;
     }
-    const randomIndex = Math.floor(Math.random() * OBSTACLE_EMOJIS.length);
-    return OBSTACLE_EMOJIS[randomIndex];
+
+    let newEmoji;
+    do {
+        const randomIndex = Math.floor(Math.random() * OBSTACLE_EMOJIS.length);
+        newEmoji = OBSTACLE_EMOJIS[randomIndex];
+    } while (newEmoji === lastUsedEmoji);
+    lastUsedEmoji = newEmoji;
+    return newEmoji;
+
+
 }
