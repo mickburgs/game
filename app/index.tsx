@@ -11,7 +11,7 @@ import {
     MAX_ROTATION_SPEED,
     MIN_OBSTACLE_SIZE,
     MIN_ROTATION_SPEED,
-    OBSTACLE_FRAME_SCALE, PRIMARY_OBSTACE,
+    OBSTACLE_FRAME_SCALE, PRIMARY_OBSTACLE,
     SCORE_INCREMENT,
     SCORE_INCREMENT_INTERVAL,
     SPEED_INCREMENT,
@@ -37,19 +37,11 @@ export default function App() {
         if (running) {
             scoreInterval = setInterval(() => {
                 setScore((prevScore) => prevScore + SCORE_INCREMENT);
-            }, SCORE_INCREMENT_INTERVAL * 1000); // Convert seconds to milliseconds
+            }, SCORE_INCREMENT_INTERVAL * 1000);
         }
 
-        return () => clearInterval(scoreInterval); // Cleanup interval
+        return () => clearInterval(scoreInterval);
     }, [running]);
-
-    useEffect(() => {
-        const hintTimeout = setTimeout(() => {
-            setShowHint(false); // Hide the hint after 5 seconds
-        }, 5000);
-
-        return () => clearTimeout(hintTimeout); // Cleanup timeout if the component unmounts
-    }, []);
 
     useEffect(() => {
         const loadHighScore = async () => {
@@ -60,7 +52,6 @@ export default function App() {
         };
         loadHighScore();
     }, []);
-
 
     useEffect(() => {
         let speedInterval: NodeJS.Timeout;
@@ -73,7 +64,6 @@ export default function App() {
     }, [running]);
 
     useEffect(() => {
-        // Sync the updated obstacleSpeed with the entities object
         setEntities((prevEntities) => ({
             ...prevEntities,
             obstacleSpeed,
@@ -90,15 +80,15 @@ export default function App() {
 
         const obstacles = Array.from({length: 3}).map((_, index) => {
             const size = getRandomBetween(MIN_OBSTACLE_SIZE, MAX_OBSTACLE_SIZE);
-            const scaledSize = size * OBSTACLE_FRAME_SCALE; // Scale down the size for the collision frame
+            const scaledSize = size * OBSTACLE_FRAME_SCALE;
             const obstacle = Matter.Bodies.circle(
                 width + index * 200,
                 Math.random() * height,
-                scaledSize / 2, // Use the scaled-down radius
+                scaledSize / 2,
                 {isStatic: true}
             );
 
-            obstacle.emoji = PRIMARY_OBSTACE;
+            obstacle.emoji = PRIMARY_OBSTACLE;
             obstacle.rotationSpeed = getRandomBetween(MIN_ROTATION_SPEED, MAX_ROTATION_SPEED);
             obstacle.rotationDirection = Math.random() > 0.5 ? 1 : -1;
 
@@ -112,10 +102,10 @@ export default function App() {
             obstacleSpeed: INITIAL_OBSTACLE_SPEED,
             rocket: {body: rocket, renderer: Rocket},
             ...obstacles.reduce((acc, obstacle, index) => {
-                const size = obstacle.circleRadius * 2 / OBSTACLE_FRAME_SCALE; // Adjust size for rendering
+                const size = obstacle.circleRadius * 2 / OBSTACLE_FRAME_SCALE;
                 acc[`obstacle${index}`] = {
                     body: obstacle,
-                    width: size, // Original size for the visual representation
+                    width: size,
                     rotation: 0,
                     rotationSpeed: obstacle.rotationSpeed,
                     rotationDirection: obstacle.rotationDirection,
@@ -141,22 +131,21 @@ export default function App() {
         setComponentKey((prevKey) => prevKey + 1);
     }
 
-    let initialRocketY = 0; // Store the rocket's initial Y position when dragging starts
-    let initialTouchY = 0; // Store the initial touch position
+    let initialRocketY = 0;
+    let initialTouchY = 0;
 
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onPanResponderGrant: (_, gestureState) => {
-            initialTouchY = gestureState.y0; // Capture the touch's Y position
-            initialRocketY = entities.rocket.body.position.y; // Capture the rocket's current Y position
-            setShowHint(false); // Hide the hint text
+            initialTouchY = gestureState.y0;
+            initialRocketY = entities.rocket.body.position.y;
+            setShowHint(false);
         },
         onPanResponderMove: (_, gestureState) => {
-            // Calculate the new Y position based on the touch movement
             const deltaY = gestureState.moveY - initialTouchY;
             const newY = Math.max(
                 0,
-                Math.min(height, initialRocketY + deltaY) // Move relative to the rocket's initial position
+                Math.min(height, initialRocketY + deltaY)
             );
             Matter.Body.setPosition(entities.rocket.body, {x: width / 4, y: newY});
         },
@@ -170,7 +159,7 @@ export default function App() {
             <GameEngine
                 systems={[
                     (entities: { obstacleSpeed: number; }, args: any) => {
-                        entities.obstacleSpeed = obstacleSpeed; // Sync speed during the game loop
+                        entities.obstacleSpeed = obstacleSpeed;
                         return physics(entities, args, width, height);
                     },
                 ]}

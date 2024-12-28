@@ -12,12 +12,12 @@ const Obstacle = ({ body, width, rotation, emoji }: any) => {
             style={{
                 position: "absolute",
                 left: position.x - frameWidth / 2,
-                top: position.y - frameWidth / 2, // Center the frame
+                top: position.y - frameWidth / 2,
                 width: frameWidth,
-                height: frameWidth, // Keep it a square
-                borderRadius: frameWidth / 2, // Makes the frame circular
-                borderColor: "blue", // Collision frame color
-                borderWidth: 0, // Frame thickness
+                height: frameWidth,
+                borderRadius: frameWidth / 2,
+                borderColor: "blue",
+                borderWidth: 0,
                 justifyContent: "center",
                 alignItems: "center",
             }}
@@ -29,12 +29,12 @@ const Obstacle = ({ body, width, rotation, emoji }: any) => {
                     height: width,
                     justifyContent: "center",
                     alignItems: "center",
-                    transform: [{ rotate: `${rotation}deg` }], // Apply rotation
+                    transform: [{ rotate: `${rotation}deg` }],
                 }}
             >
                 <Text
                     style={{
-                        fontSize: width * 0.8, // Scale emoji size
+                        fontSize: width * 0.8,
                         userSelect: "none",
                     }}
                 >

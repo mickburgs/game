@@ -12,5 +12,5 @@ export const MAX_OBSTACLE_SIZE = 200;
 export const MIN_ROTATION_SPEED = 0.1;
 export const MAX_ROTATION_SPEED = 2;
 
-export const PRIMARY_OBSTACE = "🪨";
+export const PRIMARY_OBSTACLE = "🪨";
 export const OBSTACLE_EMOJIS = ["⭐", "🛸", "🛰", "🪐", "🌎", "🌍", "🌑"];

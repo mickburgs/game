@@ -12,7 +12,7 @@ const Rocket = ({ body }) => {
                 styles.collisionFrame,
                 {
                     left: position.x - collisionWidth / 2,
-                    top: position.y - collisionHeight / 2, // Offset collision frame slightly upwards
+                    top: position.y - collisionHeight / 2,
                 },
             ]}
         >
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
         height: 25,
         justifyContent: "center",
         alignItems: "center",
-        borderColor: "red", // Red collision frame
+        borderColor: "red",
         borderWidth: 0,
         overflow: "visible",
     },
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     },
     rocketEmoji: {
         fontSize: 40,
-        userSelect: "none", // Prevent text selection
+        userSelect: "none",
     },
 });
 
