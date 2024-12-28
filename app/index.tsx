@@ -11,7 +11,7 @@ import {
     MAX_OBSTACLE_SIZE,
     MAX_ROTATION_SPEED,
     MIN_OBSTACLE_SIZE,
-    MIN_ROTATION_SPEED,
+    MIN_ROTATION_SPEED, OBSTACLE_AMOUNT,
     OBSTACLE_FRAME_SCALE, PRIMARY_OBSTACLE,
     SCORE_INCREMENT,
     SCORE_INCREMENT_INTERVAL,
@@ -79,14 +79,17 @@ export default function App() {
             isStatic: true,
         });
 
-        const obstacles = Array.from({length: 3}).map((_, index) => {
+
+        const obstacles = Array.from({ length: OBSTACLE_AMOUNT }).map((_, index) => {
             const size = getRandomBetween(MIN_OBSTACLE_SIZE, MAX_OBSTACLE_SIZE);
             const scaledSize = size * OBSTACLE_FRAME_SCALE;
+
+            const xPosition = width + (width / OBSTACLE_AMOUNT) * index
             const obstacle = Matter.Bodies.circle(
-                width + index * 200,
+                xPosition,
                 Math.random() * height,
                 scaledSize / 2,
-                {isStatic: true}
+                { isStatic: true }
             );
 
             obstacle.emoji = PRIMARY_OBSTACLE;
