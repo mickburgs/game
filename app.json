@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/image.png",
         "backgroundColor": "#000000"
-      }
+      },
+      "package": "com.mickburgs.rocket"
     },
     "web": {
       "bundler": "metro",
