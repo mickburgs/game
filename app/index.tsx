@@ -4,6 +4,7 @@ import {GameEngine} from "react-native-game-engine";
 import Matter from "matter-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Rocket from "@/components/Rocket";
+import DebugRenderer from "@/components/DebugRenderer";
 import {getRandomBetween, physics} from "@/utils/gameUtils";
 import {
     INITIAL_OBSTACLE_SPEED,
@@ -74,7 +75,7 @@ export default function App() {
         const engine = Matter.Engine.create();
         const world = engine.world;
 
-        const rocket = Matter.Bodies.rectangle(width / 4, height / 2, 20, 40, {
+        const rocket = Matter.Bodies.rectangle(width / 4, height / 2, 45, 25, {
             isStatic: true,
         });
 
@@ -154,8 +155,19 @@ export default function App() {
         },
     });
 
+    const getBodies = () => {
+        const bodies: any[] = [];
+        Object.keys(entities).forEach((key) => {
+            if (entities[key]?.body) {
+                bodies.push(entities[key].body);
+            }
+        });
+        return bodies;
+    };
+
     return (
         <View key={componentKey} style={styles.container} {...panResponder.panHandlers}>
+            {/*<DebugRenderer bodies={getBodies()} />*/}
             <GameEngine
                 systems={[
                     (entities: { obstacleSpeed: number; }, args: any) => {
@@ -222,7 +234,7 @@ const styles = StyleSheet.create({
         left: 0,
         width: "100%",
         height: "100%",
-        // backgroundColor: "rgba(0, 0, 0, 0.8)",
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
         justifyContent: "center",
         alignItems: "center",
     },

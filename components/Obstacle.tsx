@@ -17,7 +17,7 @@ const Obstacle = ({ body, width, rotation, emoji }: any) => {
                 height: frameWidth,
                 borderRadius: frameWidth / 2,
                 borderColor: "blue",
-                borderWidth: 2,
+                borderWidth: 0,
                 justifyContent: "center",
                 alignItems: "center",
             }}

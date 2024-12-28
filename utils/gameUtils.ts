@@ -54,6 +54,7 @@ export const physics = (entities: any, { time, dispatch }: any, width: number, h
                     const newSize = getRandomBetween(minSize, maxSize);
                     obstacle.circleRadius = (newSize * OBSTACLE_FRAME_SCALE) / 2;
                     obstacleEntity.width = newSize;
+                    updateObstacleSize(obstacleEntity, newSize, entities.physics.engine);
                 }
             }
         });
@@ -76,6 +77,27 @@ export const physics = (entities: any, { time, dispatch }: any, width: number, h
 
     return entities;
 };
+
+
+function updateObstacleSize(obstacleEntity: any, newSize: number, engine: Matter.Engine) {
+    const newRadius = (newSize * OBSTACLE_FRAME_SCALE) / 2;
+
+    Matter.World.remove(engine.world, obstacleEntity.body);
+
+    const newBody = Matter.Bodies.circle(
+        obstacleEntity.body.position.x,
+        obstacleEntity.body.position.y,
+        newRadius,
+        { isStatic: true }
+    );
+
+    obstacleEntity.body = newBody;
+    Matter.World.add(engine.world, newBody);
+
+    obstacleEntity.width = newSize;
+    obstacleEntity.height = newSize;
+    obstacleEntity.rotation = 0;
+}
 
 let lastUsedEmoji: string | null = null;
 function getRandomEmoji() {
