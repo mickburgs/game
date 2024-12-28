@@ -53,7 +53,9 @@ const Rocket = ({ body }) => {
             ]}
         >
             <View style={styles.rocket}>
-                <Text style={styles.rocketEmoji}>🚀</Text>
+                <View style={styles.rocketEmojiWrapper}>
+                    <Text style={styles.rocketEmoji}>🚀</Text>
+                </View>
             </View>
         </Animated.View>
     );
@@ -67,16 +69,23 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         borderColor: "red",
-        borderWidth: 0, // Set to 2 if debugging the collision frame
-        overflow: "visible",
+        borderWidth: 0, // Set to 2 for debugging collision frame
+        overflow: "visible", // Ensure clipping is handled properly
     },
     rocket: {
-        position: "absolute",
         justifyContent: "center",
         alignItems: "center",
-        width: 40,
+        borderColor: "green",
+        borderWidth: 0,
+        width: 60,
         height: 40,
         transform: [{ rotate: "45deg" }], // Initial rotation of the rocket
+        overflow: "visible", // This alone won't work on iOS/Android
+    },
+    rocketEmojiWrapper: {
+        position: "absolute", // Allow the emoji to escape parent bounds
+        justifyContent: "center",
+        alignItems: "center",
     },
     rocketEmoji: {
         fontSize: 40,
