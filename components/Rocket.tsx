@@ -47,7 +47,7 @@ const Rocket = ({ body }) => {
                 styles.collisionFrame,
                 {
                     left: position.x - collisionWidth / 2,
-                    top: position.y - collisionHeight / 1.3,
+                    top: position.y - collisionHeight / 2,
                     transform: [{ translateY: bobbingAnimation }], // Apply bobbing
                 },
             ]}

@@ -7,14 +7,24 @@ const Obstacle = ({ body, width, rotation, emoji }: any) => {
 
     const frameWidth = width * OBSTACLE_FRAME_SCALE;
 
+    function calculateOffset(rotation: number, width: number) {
+        const offsetRange = width * 0.1; // Maximum offset value
+        const normalizedRotation = rotation % 360; // Ensure rotation is within 0-360
+
+        // Map rotation to the range of -offsetRange to +offsetRange
+        const offset = Math.cos((normalizedRotation * Math.PI) / 180) * offsetRange;
+
+        return offset;
+    }
+
     return (
         <View
             style={{
                 position: "absolute",
-                left: position.x - frameWidth / 2.2,
-                top: position.y - frameWidth / 1.9,
-                width: frameWidth,
-                height: frameWidth,
+                left: position.x - width / 2,
+                top: (position.y - width / 2) - calculateOffset(rotation, width),
+                width: width,
+                height: width,
                 borderRadius: frameWidth / 2,
                 borderColor: "blue",
                 borderWidth: 0,
