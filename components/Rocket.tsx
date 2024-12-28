@@ -15,7 +15,17 @@ const Rocket = ({ body }) => {
             Animated.loop(
                 Animated.sequence([
                     Animated.timing(bobbingAnimation, {
-                        toValue: -5, // Move up by 5 units
+                        toValue: -2, // Move up by 5 units
+                        duration: 500, // Half of the cycle duration
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(bobbingAnimation, {
+                        toValue: 0, // Move down by 5 units
+                        duration: 500, // Half of the cycle duration
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(bobbingAnimation, {
+                        toValue: 2, // Move down by 5 units
                         duration: 500, // Half of the cycle duration
                         useNativeDriver: true,
                     }),
@@ -37,7 +47,7 @@ const Rocket = ({ body }) => {
                 styles.collisionFrame,
                 {
                     left: position.x - collisionWidth / 2,
-                    top: position.y - collisionHeight / 2,
+                    top: position.y - collisionHeight / 1.3,
                     transform: [{ translateY: bobbingAnimation }], // Apply bobbing
                 },
             ]}

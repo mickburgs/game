@@ -11,8 +11,8 @@ const Obstacle = ({ body, width, rotation, emoji }: any) => {
         <View
             style={{
                 position: "absolute",
-                left: position.x - frameWidth / 2,
-                top: position.y - frameWidth / 2,
+                left: position.x - frameWidth / 2.2,
+                top: position.y - frameWidth / 1.9,
                 width: frameWidth,
                 height: frameWidth,
                 borderRadius: frameWidth / 2,
